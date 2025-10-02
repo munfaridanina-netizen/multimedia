@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Menjodohkan Bangun Datar</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f9fafb; }
+    h2 { text-align: center; }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 100px;
+      margin-top: 30px;
+      position: relative;
+    }
+    .column {
+      display: flex;
+      flex-direction: column;
+      gap: 60px;
+      align-items: center;
+    }
+    canvas { border: 1px solid #555; background:white; }
+    .option {
+      padding: 10px 20px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      background:#e5e7eb;
+      cursor: pointer;
+    }
+    .selected { background:#2563eb; color:white; }
+    svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    #feedback { text-align:center; margin-top:20px; font-weight:bold; }
+  </style>
+</head>
+<body>
+  <h2>Menjodohkan Gambar Bangun Datar dengan Namanya</h2>
+  <div class="container" id="matchContainer">
+    <div class="column" id="shapes">
+      <div data-id="g1">
+        <canvas id="gambar1" width="160" height="100"></canvas>
+      </div>
+      <div data-id="g2">
+        <canvas id="gambar2" width="200" height="120"></canvas>
+      </div>
+      <div data-id="g3">
+        <canvas id="gambar3" width="140" height="140"></canvas>
+      </div>
+    </div>
+
+    <div class="column" id="names">
+      <div class="option" data-id="a">a. Segitiga</div>
+      <div class="option" data-id="b">b. Persegi Panjang</div>
+      <div class="option" data-id="c">c. Trapesium</div>
+    </div>
+
+    <svg id="lines"></svg>
+  </div>
+
+  <div style="text-align:center;margin-top:20px;">
+    <button onclick="cekJawaban()">Cek Jawaban</button>
+    <button onclick="resetAll()">Reset</button>
+  </div>
+  <div id="feedback"></div>
+
+  <script>
+    // Gambar 1: Persegi Panjang
+    const ctx1 = document.getElementById("gambar1").getContext("2d");
+    ctx1.fillStyle = "#4CAF50";
+    ctx1.fillRect(20, 20, 120, 50);
+
+    // Gambar 2: Trapesium
+    const ctx2 = document.getElementById("gambar2").getContext("2d");
+    ctx2.fillStyle = "#FF9800";
+    ctx2.beginPath();
+    ctx2.moveTo(20, 20);   // A
+    ctx2.lineTo(180, 20);  // B
+    ctx2.lineTo(150, 80);  // C
+    ctx2.lineTo(50, 80);   // D
+    ctx2.closePath();
+    ctx2.fill();
+
+    // Gambar 3: Segitiga
+    const ctx3 = document.getElementById("gambar3").getContext("2d");
+    ctx3.fillStyle = "#2196F3";
+    ctx3.beginPath();
+    ctx3.moveTo(70, 10);  
+    ctx3.lineTo(10, 120); 
+    ctx3.lineTo(130, 120);
+    ctx3.closePath();
+    ctx3.fill();
+
+    // Matching logic
+    let selectedShape = null;
+    let pairs = {};
+    const shapes = document.querySelectorAll("#shapes > div");
+    const options = document.querySelectorAll(".option");
+    const svg = document.getElementById("lines");
+
+    shapes.forEach(shape => {
+      shape.addEventListener("click", () => {
+        shapes.forEach(s => s.classList.remove("selected"));
+        shape.classList.add("selected");
+        selectedShape = shape.getAttribute("data-id");
+      });
+    });
+
+    options.forEach(opt => {
+      opt.addEventListener("click", () => {
+        if(selectedShape){
+          pairs[selectedShape] = opt.getAttribute("data-id");
+          drawLines();
+          shapes.forEach(s => s.classList.remove("selected"));
+          selectedShape = null;
+        }
+      });
+    });
+
+    function drawLines(){
+      svg.innerHTML = "";
+      Object.entries(pairs).forEach(([shapeId, nameId])=>{
+        const shapeEl = document.querySelector(`[data-id="${shapeId}"]`);
+        const nameEl = document.querySelector(`.option[data-id="${nameId}"]`);
+
+        const rect1 = shapeEl.getBoundingClientRect();
+        const rect2 = nameEl.getBoundingClientRect();
+        const containerRect = document.getElementById("matchContainer").getBoundingClientRect();
+
+        const x1 = rect1.right - containerRect.left;
+        const y1 = rect1.top + rect1.height/2 - containerRect.top;
+        const x2 = rect2.left - containerRect.left;
+        const y2 = rect2.top + rect2.height/2 - containerRect.top;
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", x1);
+        line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y2", y2);
+        line.setAttribute("stroke", "black");
+        line.setAttribute("stroke-width", "2");
+        svg.appendChild(line);
+      });
+    }
+
+    function cekJawaban(){
+      const feedback = document.getElementById("feedback");
+      if(pairs["g1"]==="b" && pairs["g2"]==="c" && pairs["g3"]==="a"){
+        feedback.textContent="Selamat jawaban anda benar";
+        feedback.style.color="green";
+      } else {
+        feedback.textContent="Jawaban anda salah. Silakan coba lagi";
+        feedback.style.color="red";
+      }
+    }
+
+    function resetAll(){
+      pairs = {};
+      svg.innerHTML="";
+      document.getElementById("feedback").textContent="";
+    }
+  </script>
+</body>
+</html>

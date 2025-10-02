@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Bilangan Berpangkat</title>
+</head>
+<body>
+  <h1>Bilangan Berpangkat</h1>
+  <p>3<sup>4</sup> = ...</p>
+
+  <form id="quizForm">
+    <label><input type="checkbox" value="a"> a. 3 × 3 × 3 × 3</label><br>
+    <label><input type="checkbox" value="b"> b. 3<sup>2</sup> × 3<sup>2</sup></label><br>
+    <label><input type="checkbox" value="c"> c. 3<sup>3</sup> × 3</label><br>
+    <label><input type="checkbox" value="d"> d. 3<sup>2</sup> + 3<sup>2</sup></label><br><br>
+
+    <button type="button" onclick="checkAnswer()">Cek Jawaban</button>
+    <button type="reset">Reset</button>
+  </form>
+
+  <p id="feedback"></p>
+
+  <script>
+    function checkAnswer() {
+      // Ambil jawaban yang dipilih
+      const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                            .map(cb => cb.value);
+
+      // Jawaban benar
+      const correct = ['a','b','c'];
+
+      // Cek benar atau salah
+      const isCorrect = correct.every(val => selected.includes(val)) &&
+                        selected.every(val => correct.includes(val));
+
+      const feedback = document.getElementById('feedback');
+      if (isCorrect) {
+        feedback.textContent = "Selamat jawaban anda benar";
+        feedback.style.color = "green";
+      } else {
+        feedback.textContent = "Jawaban anda salah. Silakan coba lagi";
+        feedback.style.color = "red";
+      }
+    }
+  </script>
+</body>
+</html>
