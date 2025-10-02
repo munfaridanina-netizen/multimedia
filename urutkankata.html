@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Urutkan Kata (Drag & Drop)</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f0f9ff}
+    .card{background:white;padding:28px;border-radius:12px;box-shadow:0 8px 24px rgba(30,41,59,0.08);max-width:620px;width:92%}
+    h1{text-align:center;font-size:26px;margin-bottom:16px}
+    .words{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;justify-content:center}
+    .word{padding:8px 14px;border-radius:8px;background:#2563eb;color:white;font-weight:600;cursor:grab;user-select:none}
+    textarea{width:100%;height:90px;border:1px dashed #94a3b8;border-radius:8px;padding:10px;font-size:15px;margin-bottom:14px}
+    .buttons{display:flex;gap:10px;justify-content:center;margin-bottom:14px}
+    button{padding:10px 16px;border:0;border-radius:8px;font-weight:600;cursor:pointer}
+    .check{background:#16a34a;color:white}
+    .reset{background:#ef4444;color:white}
+    .feedback{display:none;margin-top:10px;padding:10px;border-radius:8px;text-align:center}
+    .success{background:#ecfdf5;border:1px solid #10b981;color:#065f46}
+    .error{background:#fff1f2;border:1px solid #fb7185;color:#9f1239}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Urutkan Kata</h1>
+    <p>Drag & drop kata di bawah ini ke kotak jawaban untuk membentuk kalimat:</p>
+    <div class="words" id="wordContainer"></div>
+
+    <textarea id="answer" placeholder="Drop kata di sini..." readonly></textarea>
+
+    <div class="buttons">
+      <button class="check" id="checkBtn">Hasil</button>
+      <button class="reset" id="resetBtn">Reset</button>
+    </div>
+
+    <div id="feedback" class="feedback"></div>
+  </main>
+
+  <script>
+    const words = ["I", "am", "going", "to", "the", "market"];
+    const wordContainer = document.getElementById('wordContainer');
+    const answer = document.getElementById('answer');
+    const feedback = document.getElementById('feedback');
+
+    function shuffle(array){
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function renderWords(){
+      wordContainer.innerHTML = '';
+      shuffle([...words]).forEach((word, index) => {
+        const btn = document.createElement('div');
+        btn.className = 'word';
+        btn.textContent = word;
+        btn.setAttribute('draggable', true);
+        btn.id = 'word-' + index;
+        btn.addEventListener('dragstart', dragStart);
+        wordContainer.appendChild(btn);
+      });
+    }
+
+    function dragStart(e){
+      e.dataTransfer.setData('text/plain', e.target.textContent);
+      e.dataTransfer.setData('id', e.target.id);
+    }
+
+    answer.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    });
+
+    answer.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const word = e.dataTransfer.getData('text/plain');
+      const id = e.dataTransfer.getData('id');
+      if(answer.value){
+        answer.value += '-' + word;
+      } else {
+        answer.value = word;
+      }
+      const elem = document.getElementById(id);
+      if(elem) elem.remove();
+    });
+
+    function checkAnswer(){
+      const ans = answer.value.trim();
+      if(ans === 'I-am-going-to-the-market'){
+        feedback.textContent = 'Hebat jawaban anda benar';
+        feedback.className = 'feedback success';
+        feedback.style.display = 'block';
+      } else {
+        feedback.textContent = 'Maaf jawaban anda salah. Ulangi lagi';
+        feedback.className = 'feedback error';
+        feedback.style.display = 'block';
+      }
+    }
+
+    function resetGame(){
+      answer.value = '';
+      feedback.style.display = 'none';
+      renderWords();
+    }
+
+    document.getElementById('checkBtn').addEventListener('click', checkAnswer);
+    document.getElementById('resetBtn').addEventListener('click', resetGame);
+
+    renderWords();
+  </script>
+</body>
+</html>
