@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Latihan Menyusun Kalimat Bahasa Arab</title>
+  <style>
+    /* ---------- Layout & Header ---------- */
+    :root{
+      --nav-width: 8cm;
+      --header-bg: #001f4d; /* biru dongker */
+      --btn-green: #16a34a;
+      --btn-red: #dc2626;
+      --btn-blue: #0b69c6;
+      --accent: #0b6b9f;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0; font-family: "Noto Naskh Arabic", system-ui, Arial, sans-serif; background:#f6f8fb; color:#111827}
+    header{
+      position:fixed; left:0; right:0; top:0;
+      height:1.75cm;
+      background:var(--header-bg);
+      color:white;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      line-height:1.25; /* spasi antar tulisan 1.25 */
+      padding:4px 8px;
+      z-index:1000;
+    }
+    header .line1{ font-weight:800; font-size:14px; }
+    header .line2{ font-size:12px; opacity:0.95; margin-top:2px; }
+
+    /* wrapper under header */
+    .wrapper{ display:flex; gap:12px; padding:12px; margin-top:1.75cm; height: calc(100vh - 1.75cm); align-items:flex-start; }
+
+    /* ---------- Navigator (kiri) ---------- */
+    nav.side{
+      width:var(--nav-width);
+      min-width:160px;
+      background:#ffffff;
+      border-radius:8px;
+      padding:10px;
+      box-shadow:0 1px 6px rgba(0,0,0,0.06);
+      overflow:auto;
+      align-self:flex-start;
+    }
+    .nav-title{ font-weight:800; margin-bottom:8px; text-align:center; }
+    .nav-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+    .nav-list button{
+      background:#f3f6fb; border:1px solid rgba(0,0,0,0.05); padding:10px 8px; border-radius:6px; cursor:pointer; font-weight:700; text-align:center;
+    }
+    .nav-list button.active{ background:var(--accent); color:white; border-color:rgba(0,0,0,0.06) }
+
+    /* ---------- Content ---------- */
+    main.content{ flex:1; min-width:0; display:flex; flex-direction:column; gap:12px; }
+    .card{ background:white; border-radius:10px; padding:12px; box-shadow:0 1px 6px rgba(16,24,40,0.04); }
+
+    .qhead{ display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:8px; }
+    .qtitle{ font-weight:900; font-size:16px; }
+    .controls{ display:flex; gap:8px; align-items:center; }
+
+    /* bank & answer */
+    .word-bank, .answer-area{
+      min-height:64px;
+      padding:10px;
+      border-radius:8px;
+      border:2px dashed rgba(0,0,0,0.06);
+      background:#fbfdff;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end; /* align to right visually */
+    }
+    .answer-area{ direction:rtl; background:#fffdfa; }
+
+    /* word tokens */
+    .word {
+      padding:8px 12px;
+      border-radius:999px;
+      background:var(--accent);
+      color:white;
+      font-size:20px;
+      cursor:grab;
+      user-select:none;
+      white-space:nowrap;
+      line-height:1;
+      direction:rtl; /* render Arabic rtl inside token */
+    }
+    .word:active{ cursor:grabbing; }
+    .hidden-token{ opacity:0.12; pointer-events:none; }
+
+    /* drop hover visual */
+    .drop-hover { outline:3px dashed rgba(11,36,71,0.12); }
+
+    /* buttons */
+    .btn{ padding:8px 12px; border-radius:8px; border:0; cursor:pointer; font-weight:800; color:white }
+    .btn.hasil{ background:var(--btn-green); }
+    .btn.reset{ background:var(--btn-red); }
+    .btn.acak{ background:var(--btn-blue); }
+
+    .feedback{ margin-top:10px; font-weight:800; font-size:15px; min-height:1.2em; }
+
+    /* responsive: nav below for small screens */
+    @media(max-width:840px){
+      .wrapper{ flex-direction:column; }
+      nav.side{ width:100%; order:2; }
+    }
+  </style>
+</head>
+<body><!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4KX380T5BD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-4KX380T5BD');
+</script>
+
+
+  <header>
+    <div class="line1">LATIHAN MENYUSUN KALIMAT BAHASA ARAB</div>
+    <div class="line2">Disusun oleh: Tim Pengembang Media Pembelajaran Online Berbasis AI</div>
+  </header>
+
+  <div class="wrapper">
+    <!-- Navigator kiri -->
+    <nav class="side" aria-label="Navigator Soal">
+      <div class="nav-title">Daftar Soal</div>
+      <ul class="nav-list" id="navList" role="tablist" aria-orientation="vertical"></ul>
+    </nav>
+
+    <!-- Konten -->
+    <main class="content">
+      <div class="card">
+        <div class="qhead">
+          <div>
+            <div id="qTitle" class="qtitle">Pilih Soal</div>
+            <div style="font-size:12px; color:#374151">Susun kata dari kanan ke kiri. Seret kata dari <strong>Bank Kata</strong> ke <strong>Jawaban Anda</strong>.</div>
+          </div>
+          <div class="controls">
+            <button id="btnHasil" class="btn hasil" title="Hasil (cek)">Hasil</button>
+            <button id="btnReset" class="btn reset" title="Reset soal">Reset</button>
+            <button id="btnAcak" class="btn acak" title="Acak kata">Acak</button>
+          </div>
+        </div>
+
+        <div style="font-weight:700; margin-bottom:6px">Bank Kata</div>
+        <div id="bank" class="word-bank" aria-label="Bank Kata (seret dari sini)"></div>
+
+        <div style="font-weight:700; margin-top:12px; margin-bottom:6px">Jawaban Anda (susun di sini — baca kanan → kiri)</div>
+        <div id="answer" class="answer-area" aria-label="Area jawaban (letakkan kata di sini)"></div>
+
+        <div id="feedback" class="feedback" aria-live="polite"></div>
+      </div>
+    </main>
+  </div>
+
+<script>
+/* ---------- Soal (kunci urutan benar) ---------- */
+const QUESTIONS = [
+  ["أَنَا","أُحِبُّ","ٱلْمَدْرَسَةَ"],
+  ["هُوَ","يَكْتُبُ","ٱلدَّرْسَ"],
+  ["نَحْنُ","نَذْهَبُ","إِلَى","ٱلْمَسْجِدِ"],
+  ["هِيَ","تَقْرَأُ","ٱلْكِتَابَ"],
+  ["ٱلطَّالِبُ","يَجْلِسُ","فِي","ٱلْفَصْلِ"],
+  ["ٱلْمُعَلِّمُ","يُشْرِحُ","ٱلدَّرْسَ"],
+  ["أَنَا","آكُلُ","ٱلتُّفَّاحَ"],
+  ["أَنْتَ","تَشْرَبُ","ٱلْمَاءَ"],
+  ["هُمْ","يَلْعَبُونَ","فِي","ٱلْحَدِيقَةِ"],
+  ["نَحْنُ","نَكْتُبُ","ٱلْوَاجِبَ"]
+];
+
+/* ---------- Util ---------- */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function cssEscape(str){
+  return String(str).replace(/(["\\])/g, '\\$1');
+}
+
+/* ---------- State & elements ---------- */
+let currentIndex = null;
+let uniqueCounter = 0;
+
+const navList = document.getElementById('navList');
+const bankEl = document.getElementById('bank');
+const answerEl = document.getElementById('answer');
+const qTitle = document.getElementById('qTitle');
+const feedbackEl = document.getElementById('feedback');
+const btnHasil = document.getElementById('btnHasil');
+const btnReset = document.getElementById('btnReset');
+const btnAcak = document.getElementById('btnAcak');
+
+/* ---------- Build navigator (left) ---------- */
+function buildNav(){
+  navList.innerHTML = '';
+  for(let i=0;i<QUESTIONS.length;i++){
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = `Soal Nomor ${i+1}`;
+    btn.dataset.idx = i;
+    btn.addEventListener('click', ()=> openQuestion(i));
+    li.appendChild(btn);
+    navList.appendChild(li);
+  }
+}
+buildNav();
+
+/* Mark active nav */
+function markActive(){
+  [...navList.querySelectorAll('button')].forEach(b=>{
+    b.classList.toggle('active', Number(b.dataset.idx) === currentIndex);
+  });
+}
+
+/* Create token element (unique id) */
+function createToken(word){
+  uniqueCounter++;
+  const id = `tok-${uniqueCounter}`;
+  const el = document.createElement('div');
+  el.className = 'word';
+  el.id = id;
+  el.dataset.word = word;
+  el.setAttribute('draggable', 'true');
+  el.textContent = word;
+
+  el.addEventListener('dragstart', (e)=>{
+    e.dataTransfer.setData('text/plain', id);
+    e.dataTransfer.effectAllowed = 'move';
+    // slight dim while dragging
+    setTimeout(()=> el.classList.add('hidden-token'), 10);
+  });
+  el.addEventListener('dragend', ()=>{
+    // in case it's still present (drop will move it), remove hidden
+    el.classList.remove('hidden-token');
+  });
+
+  // click/tap support (toggle move to answer or back to bank)
+  el.addEventListener('click', ()=>{
+    if(el.parentElement === bankEl){
+      answerEl.appendChild(el);
+    } else {
+      bankEl.appendChild(el);
+    }
+    clearFeedback();
+  });
+
+  return el;
+}
+
+/* Render question: randomize bank & clear answer */
+function renderQuestion(idx){
+  currentIndex = idx;
+  qTitle.textContent = `Soal ${idx+1}`;
+  bankEl.innerHTML = '';
+  answerEl.innerHTML = '';
+  feedbackEl.textContent = '';
+  feedbackEl.className = 'feedback';
+  // shuffle words
+  const shuffled = shuffle(QUESTIONS[idx]);
+  shuffled.forEach(w => bankEl.appendChild(createToken(w)));
+  markActive();
+}
+
+/* Open question when nav clicked (randomized on open) */
+function openQuestion(idx){
+  renderQuestion(idx);
+}
+
+/* Enable drop zones (bank and answer) */
+function enableDropZones(){
+  // allow drop to answer
+  answerEl.addEventListener('dragover', (e)=> { e.preventDefault(); answerEl.classList.add('drop-hover'); });
+  answerEl.addEventListener('dragleave', ()=> { answerEl.classList.remove('drop-hover'); });
+  answerEl.addEventListener('drop', (e)=> {
+    e.preventDefault();
+    answerEl.classList.remove('drop-hover');
+    const id = e.dataTransfer.getData('text/plain');
+    if(!id) return;
+    const token = document.getElementById(id);
+    if(token) answerEl.appendChild(token);
+    clearFeedback();
+  });
+
+  // allow drop back to bank
+  bankEl.addEventListener('dragover', (e)=> { e.preventDefault(); bankEl.classList.add('drop-hover'); });
+  bankEl.addEventListener('dragleave', ()=> { bankEl.classList.remove('drop-hover'); });
+  bankEl.addEventListener('drop', (e)=> {
+    e.preventDefault();
+    bankEl.classList.remove('drop-hover');
+    const id = e.dataTransfer.getData('text/plain');
+    if(!id) return;
+    const token = document.getElementById(id);
+    if(token) bankEl.appendChild(token);
+    clearFeedback();
+  });
+}
+enableDropZones();
+
+/* ---------- Buttons handlers ---------- */
+btnHasil.addEventListener('click', ()=>{
+  checkCurrent();
+});
+btnReset.addEventListener('click', ()=>{
+  if(currentIndex !== null) renderQuestion(currentIndex);
+});
+btnAcak.addEventListener('click', ()=>{
+  if(currentIndex !== null) renderQuestion(currentIndex);
+});
+
+/* ---------- Checking logic ---------- */
+function checkCurrent(){
+  if(currentIndex === null) return;
+  const placed = Array.from(answerEl.children).map(ch => ch.dataset.word);
+  const key = QUESTIONS[currentIndex];
+  if(placed.length !== key.length){
+    feedbackEl.textContent = `Maaf. Jawabn Anda salah. Ulangi lagi.`;
+    feedbackEl.className = 'feedback';
+    return false;
+  }
+  // compare element-wise: placed[0] corresponds to first word (rightmost visible)
+  let ok = true;
+  for(let i=0;i<key.length;i++){
+    if(placed[i] !== key[i]){ ok = false; break; }
+  }
+  if(ok){
+    feedbackEl.textContent = 'Hebat. Jawaban Anda benar';
+    feedbackEl.className = 'feedback';
+    return true;
+  }else{
+    feedbackEl.textContent = 'Maaf. Jawabn Anda salah. Ulangi lagi.';
+    feedbackEl.className = 'feedback';
+    return false;
+  }
+}
+
+/* clear feedback text */
+function clearFeedback(){ feedbackEl.textContent = ''; feedbackEl.className = 'feedback'; }
+
+/* ---------- Initialize: open first question ---------- */
+document.addEventListener('DOMContentLoaded', ()=>{
+  openQuestion(0);
+});
+</script>
+</body>
+<!-- Hosted by www.Geocities.ws -->
+</html>
